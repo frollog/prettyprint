@@ -7,9 +7,31 @@ $kekich = null;
 $v = 'ololo ололо ololo (), (f ase, 8asdf ()) ';
 //echo $v,'<br>';
 
+$bibib = new Stdclass();
+$bibib->poop = '<p>Абзац</p>';
+class nanayna
+{
+	public $azaza = 1111111111;
+	private $zupu = '{1:"1452000000"}';
+}
+
+
+class lalayla 
+{
+	static private $var = '123.123.32.32';
+	static protected $mao = '2e45';
+}	
+
+
+pretty_print($bibib);
+pretty_print(new nanayna());
+
 
 pretty_print($kekich);
 pretty_print($heh);
+// echo '<pre>';
+// var_dump($heh);
+// echo '</pre>';
 pretty_print($v);
 pretty_print(2000000000);
 // $st = ' width=10';

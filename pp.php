@@ -1,5 +1,5 @@
 <?php
-
+//TODO: распознавание цвета, строка как число, адрес строки в файле
 function pretty_print ($in = null, $opened = true, $param = array())
 {
 	//определяем имя вызываемой переменой
@@ -46,14 +46,14 @@ function pretty_print ($in = null, $opened = true, $param = array())
 
 class pretty_print_class 
 {
-	private $var 			= null;
+	private $var 			= null; //анализируемая переменная
 	private $opened 		= true; //вывод субэлементов
 	private $open_props 	= false; //вывод свойств
 	private $open_fields 	= false; //вывод полей свойств
 	private $max_str_len 	= 100;
-	private $time_start 	= 631152000; //1990.01.01
+	private $time_start 	= 631152000; //1990.01.01 - дата, начиная с которой числа парсятся как даты
 	private $name 			= '';
-	private $to_file 		= false;
+	private $to_file 		= false; //сохранение в файл
 	private $style_border 	= ' style="border: 1px solid red; padding: 5px"';
 	private $style_unset 	= ' style="color:red"';
 	private $style_string 	= ' style="color:magenta"';
@@ -62,8 +62,8 @@ class pretty_print_class
 	private $style_double	= ' style="color:LimeGreen"';
 	private $style_bool		= ' style="color:blue"';
 	private $style_margin 	= ' style="margin-left:30px"';
-	private $style_td1	 	= ' width=10';
-	private $style_td2	 	= ' width=10';
+	private $style_td1	 	= ' width=10; style="white-space: nowrap"'; // nowrap
+	private $style_td2	 	= ' width=10; style="white-space: nowrap"'; // width=10
 	private $style_td3	 	= ' style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"';
 	private $style_table	= ' border="1" cellpadding="5"';
 	private $style_text		= ' style="margin-left:30px; white-space:pre-wrap; text-indent: 20px; word-break:break-all"';
@@ -167,6 +167,7 @@ class pretty_print_class
 	
 	private function object_print ($obj, $name = '-object-', $show_all = false, $status = null)
 	{
+		$name = '<b>'.$name.'</b>';
 		if (!is_object($obj))
 		{
 			return;
@@ -227,7 +228,7 @@ class pretty_print_class
 			$this->detail_ins_begin($name, $type, '', $this->opened);
 			if ($methods)
 			{
-				$this->field_detail_begin('class methods', '', true);
+				$this->field_detail_begin('public methods', '', true);
 				$this->pp_rec($methods);
 				$this->field_detail_end('', true);
 			}
@@ -242,6 +243,7 @@ class pretty_print_class
 	
 	private function array_print ($arr, $name = '-array-', $status = '')
 	{
+		$name = '<b>'.$name.'</b>';
 		if (!is_array($arr))
 		{
 			return;
@@ -425,7 +427,7 @@ class pretty_print_class
 	private function print_int ($value, $key, $status='')
 	{
 		$name = $key;
-		$type = '(['.floor(log10(abs($value))).'DEC]<i><b>'.$status.'</b>integer</i>)';
+		$type = '(['.floor(log10(abs($value))+1).'DEC]<i><b>'.$status.'</b>integer</i>)';
 		$value_det = '<span'.$this->style_int.'>'.$value.'</span>';
 		$need_time = $this->get_time($value);
 		if ($need_time) //свойства
@@ -496,13 +498,14 @@ class pretty_print_class
 	
 	private function field_detail_begin($name, $value, $full_form = false)
 	{
+		$name = '-'.$name.'-';
 		if(mb_strlen($value) > $this->max_str_len || $full_form)
 		{
 			$id = rand();
 			$disp = $this->open_fields?'': ' style="display:none;"';
 			$this->add(
 				'<tr onclick="hideShowRaw'.$this->func_id.'('.$id.')">'.
-					'<td'.$this->style_td1.'>'.'-'.$name.'-'.'</td>'.
+					'<td'.$this->style_td1.'>'.$this->name_to_expand($name).'</td>'.
 					'<td'.$this->style_td3.'>'.$value.'</td>'.
 				'</tr>'.
 				'<tr id="'.$id.'"'.$disp.'>'.
@@ -516,7 +519,7 @@ class pretty_print_class
 			$this->add(
 				'<tr>'.
 					'<td'.$this->style_td1.'>'.
-						'-'.$name.'-'.
+						$name.
 					'</td>'.
 					'<td>');
 		}
@@ -570,7 +573,7 @@ class pretty_print_class
 		$id = rand();
 		$disp = $open?'': ' style="display:none;"';
 		$this->add ('<tr onclick="hideShowRaw'.$this->func_id.'('.$id.')">');
-			$this->add ('<td'.$this->style_td1.'>'.($value?'<b>':'').$name.($value?'</b>':'').'</td>');
+			$this->add ('<td'.$this->style_td1.'>'.($value?'<b>':'').$this->name_to_expand($name).($value?'</b>':'').'</td>');
 			$this->add ('<td'.$this->style_td2.'>'.$type.'</td>');
 			$this->add ('<td'.$this->style_td3.'>'.$value.'</td>');
 		$this->add ('</tr>');
@@ -596,6 +599,11 @@ class pretty_print_class
 		{
 			//TODO to file
 		}
+	}
+	
+	private function name_to_expand($name)
+	{
+		return '<u>'.$name.'</u>';
 	}
 	
 	private function out ()
