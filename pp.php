@@ -44,6 +44,8 @@ function pretty_print ($in = null, $opened = true, $param = array())
 	//pretty_print_orig($obj, true, false, true, true);
 }
 
+
+//TODO https://codebra.ru/ru/lessons-html/table/4/1  http://htmlbook.ru/content/tablitsa-s-ramkoy  - стили таблицы
 class pretty_print_class 
 {
 	private $var 			= null; //анализируемая переменная
@@ -63,10 +65,13 @@ class pretty_print_class
 	private $style_bool		= ' style="color:blue"';
 	private $style_margin 	= ' style="margin-left:30px"';
 	private $style_td1	 	= ' width=10; style="white-space: nowrap"'; // nowrap
+	private $style_td1_cur 	= ' width=10; style="white-space: nowrap; cursor: pointer"'; // nowrap  
 	private $style_td2	 	= ' width=10; style="white-space: nowrap"'; // width=10
 	private $style_td3	 	= ' style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"';
 	private $style_table	= ' border="1" cellpadding="5"';
 	private $style_text		= ' style="margin-left:30px; white-space:pre-wrap; text-indent: 20px; word-break:break-all"';
+	private $open_arrow		= '&#9656'; //треугольник направо
+	private $close_arrow	= '&#9662'; //треугольник вниз
 	private $res 			= array();
 	private $filestream 	= null;
 	private $func_id 		= 1;
@@ -93,14 +98,18 @@ class pretty_print_class
 		('<script>'.
 			'function hideShowRaw'.$this->func_id.'(id)'.
 			'{'.
-				'var x = document.getElementById(id);'.
+				'var x = document.getElementById("pp"+id);'.
+				'var y = document.getElementById("ppR"+id);'.
+				//'console.log(y.innerHTML);'.
 				'if (x.style.display === "none")'.
 				'{'.
 					'x.style.display = "table-row";'.
+					'y.innerHTML = "'.$this->close_arrow.'"+y.innerHTML.substring(1);'.
 				'}'.
 				'else'.
 				'{'.
 					'x.style.display = "none";'.
+					'y.innerHTML = "'.$this->open_arrow.'"+y.innerHTML.substring(1);'.
 				'}'.
 			'}'.
 		'</script>');
@@ -504,11 +513,12 @@ class pretty_print_class
 			$id = rand();
 			$disp = $this->open_fields?'': ' style="display:none;"';
 			$this->add(
-				'<tr onclick="hideShowRaw'.$this->func_id.'('.$id.')">'.
-					'<td'.$this->style_td1.'>'.$this->name_to_expand($name).'</td>'.
+				'<tr>'.
+					'<td'.$this->style_td1_cur.' id="ppR'.$id.'" onclick="hideShowRaw'.$this->func_id.'('.$id.')">'.
+						($this->open_fields?$this->close_arrow:$this->open_arrow).$name.'</td>'.
 					'<td'.$this->style_td3.'>'.$value.'</td>'.
 				'</tr>'.
-				'<tr id="'.$id.'"'.$disp.'>'.
+				'<tr id="pp'.$id.'"'.$disp.'>'.
 					'<td colspan=2>'.
 						'<table'.$this->style_table.'>'.
 							'<tr>'.
@@ -572,12 +582,14 @@ class pretty_print_class
 	{
 		$id = rand();
 		$disp = $open?'': ' style="display:none;"';
-		$this->add ('<tr onclick="hideShowRaw'.$this->func_id.'('.$id.')">');
-			$this->add ('<td'.$this->style_td1.'>'.($value?'<b>':'').$this->name_to_expand($name).($value?'</b>':'').'</td>');
+		$this->add ('<tr>');
+			$this->add ('<td'.$this->style_td1_cur.' id="ppR'.$id.'" onclick="hideShowRaw'.$this->func_id.'('.$id.')">'.
+				($open?$this->close_arrow:$this->open_arrow).
+				($value?'<b>':'').$name.($value?'</b>':'').'</td>');
 			$this->add ('<td'.$this->style_td2.'>'.$type.'</td>');
 			$this->add ('<td'.$this->style_td3.'>'.$value.'</td>');
 		$this->add ('</tr>');
-		$this->add ('<tr id="'.$id.'"'.$disp.'>');//table-row
+		$this->add ('<tr id="pp'.$id.'"'.$disp.'>');//table-row
 			$this->add ('<td colspan=3>');
 				$this->add ('<table'.$this->style_table.'>');
 	}
@@ -600,11 +612,11 @@ class pretty_print_class
 			//TODO to file
 		}
 	}
-	
+	/* 
 	private function name_to_expand($name)
 	{
 		return '<u>'.$name.'</u>';
-	}
+	} */
 	
 	private function out ()
 	{
